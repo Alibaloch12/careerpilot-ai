@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: careerpilot-ai
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:careerpilot-super-secret-signing-key-for-hmac-sha256-minimum-32-bytes}
+    expiration-ms: 86400000
+  ai:
+    provider: ${AI_PROVIDER:auto}
+    gemini-api-key: ${GEMINI_API_KEY:}
+    gemini-model: ${GEMINI_MODEL:gemini-2.0-flash}
+    ollama-base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+    ollama-model: ${OLLAMA_MODEL:llama3.2}
+
+server:
+  port: 8080

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CareerPilot AI — Job Application Tracker &amp; AI Career Coach</title>
+    <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-logo">CP</div>
+            <div>
+                <h1>CareerPilot <span>AI</span></h1>
+                <p class="subtitle">Job Application Tracker • Resume Matcher • AI Interview Coach</p>
+            </div>
+        </div>
+        <div class="topbar-actions">
+            <div id="userBadge" class="user-badge hidden">
+                <span id="userEmailDisplay"></span>
+                <button id="logoutBtn" class="btn btn-sm btn-outline">Sign Out</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- AUTHENTICATION VIEW -->
+        <section id="authSection" class="auth-wrapper">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h2>Sign in to CareerPilot AI</h2>
+                    <p>Manage your job applications, match resumes against job descriptions, and prepare for interviews.</p>
+                </div>
+
+                <div class="auth-tabs">
+                    <button id="tabLoginBtn" class="auth-tab active" type="button">Sign In</button>
+                    <button id="tabRegisterBtn" class="auth-tab" type="button">Create Account</button>
+                </div>
+
+                <form id="authForm" class="form-stack">
+                    <div id="fullNameGroup" class="form-group hidden">
+                        <label for="authFullName">Full Name</label>
+                        <input type="text" id="authFullName" placeholder="Your Full Name" />
+                    </div>
+                    <div class="form-group">
+                        <label for="authEmail">Email Address</label>
+                        <input type="email" id="authEmail" required placeholder="you@example.com" />
+                    </div>
+                    <div class="form-group">
+                        <label for="authPassword">Password (minimum 8 characters)</label>
+                        <input type="password" id="authPassword" required minlength="8" placeholder="••••••••" />
+                    </div>
+                    <button type="submit" id="authSubmitBtn" class="btn btn-primary btn-block">Sign In</button>
+                </form>
+                <div id="authError" class="alert alert-error hidden"></div>
+            </div>
+        </section>
+
+        <!-- MAIN APPLICATION DASHBOARD -->
+        <section id="dashboardSection" class="hidden">
+            <!-- KPI Metrics Bar -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <span class="kpi-label">Total Applications</span>
+                    <strong id="kpiTotalApps" class="kpi-value">0</strong>
+                    <span class="kpi-sub">Active in tracker</span>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-label">Interview Conversion</span>
+                    <strong id="kpiConversion" class="kpi-value accent-emerald">0%</strong>
+                    <span class="kpi-sub">Applications reaching interviews</span>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-label">Active Interviews</span>
+                    <strong id="kpiInterviewing" class="kpi-value accent-blue">0</strong>
+                    <span class="kpi-sub">In interview stages</span>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-label">Saved Resumes</span>
+                    <strong id="kpiResumes" class="kpi-value accent-purple">0</strong>
+                    <span class="kpi-sub">Ready for matching</span>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-target="viewPipeline">Applications</button>
+                <button class="nav-tab" data-target="viewResumes">Resumes</button>
+                <button class="nav-tab" data-target="viewRag">Resume Search</button>
+                <button class="nav-tab" data-target="viewAgent">AI Interview Coach</button>
+            </nav>
+
+            <!-- TAB 1: APPLICATIONS PIPELINE -->
+            <div id="viewPipeline" class="tab-view">
+                <div class="split-layout">
+                    <!-- Left Column: Add Application + List -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>My Job Applications</h3>
+                            <select id="statusFilterSelect" class="select-sm">
+                                <option value="">All Statuses</option>
+                                <option value="APPLIED">APPLIED</option>
+                                <option value="INTERVIEWING">INTERVIEWING</option>
+                                <option value="OFFER">OFFER</option>
+                                <option value="REJECTED">REJECTED</option>
+                                <option value="WITHDRAWN">WITHDRAWN</option>
+                            </select>
+                        </div>
+
+                        <details class="collapsible-form">
+                            <summary>+ Add Job Application</summary>
+                            <form id="createAppForm" class="form-grid">
+                                <div class="form-group">
+                                    <label>Company Name *</label>
+                                    <input type="text" id="appCompany" required placeholder="e.g. Stripe" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Role Title *</label>
+                                    <input type="text" id="appRole" required placeholder="e.g. Software Engineer" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Work Mode</label>
+                                    <select id="appWorkMode">
+                                        <option value="REMOTE">REMOTE</option>
+                                        <option value="HYBRID">HYBRID</option>
+                                        <option value="ONSITE">ONSITE</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Resume Used</label>
+                                    <select id="appResumeSelect">
+                                        <option value="">-- Select Resume --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Min Salary</label>
+                                    <input type="number" id="appSalaryMin" placeholder="100000" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Max Salary</label>
+                                    <input type="number" id="appSalaryMax" placeholder="140000" />
+                                </div>
+                                <div class="form-group full-width">
+                                    <label>Job Description</label>
+                                    <textarea id="appJd" rows="4" placeholder="Paste the full job description here to analyze skill match and generate tailored interview prep..."></textarea>
+                                </div>
+                                <div class="form-group full-width">
+                                    <button type="submit" class="btn btn-primary">Save Application</button>
+                                </div>
+                            </form>
+                        </details>
+
+                        <div id="applicationsList" class="card-list"></div>
+                    </div>
+
+                    <!-- Right Column: Selected Application Details -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Application Details</h3>
+                            <button id="deleteAppBtn" class="btn btn-sm btn-outline hidden" style="color: #fca5a5; border-color: #ef4444;">Delete</button>
+                        </div>
+                        <div id="inspectorEmpty" class="empty-state">
+                            Select an application from the list to view its resume match analysis, job description, and interview schedule.
+                        </div>
+                        <div id="inspectorContent" class="hidden">
+                            <div class="inspector-top">
+                                <div>
+                                    <h4 id="inspCompanyRole"></h4>
+                                    <span id="inspMeta" class="text-muted"></span>
+                                </div>
+                                <div class="status-controls">
+                                    <select id="inspStatusSelect" class="select-sm">
+                                        <option value="APPLIED">APPLIED</option>
+                                        <option value="INTERVIEWING">INTERVIEWING</option>
+                                        <option value="OFFER">OFFER</option>
+                                        <option value="REJECTED">REJECTED</option>
+                                        <option value="WITHDRAWN">WITHDRAWN</option>
+                                    </select>
+                                    <button id="updateStatusBtn" class="btn btn-sm btn-outline">Save Status</button>
+                                </div>
+                            </div>
+
+                            <!-- AI Assessment Card -->
+                            <div class="ai-box">
+                                <div class="ai-box-header">
+                                    <strong>Resume vs. Job Match Analysis</strong>
+                                    <span id="inspAiScoreBadge" class="score-pill">--%</span>
+                                </div>
+                                <p id="inspAiMatched" class="skill-line"></p>
+                                <p id="inspAiMissing" class="skill-line"></p>
+                                <p id="inspAiAdvice" class="ai-advice"></p>
+                                <div class="inline-form" style="margin-top: 0.6rem;">
+                                    <select id="reEvalResumeSelect" class="select-sm" style="flex: 1;">
+                                        <option value="">-- Choose Resume to Evaluate --</option>
+                                    </select>
+                                    <button id="reEvalBtn" type="button" class="btn btn-sm btn-outline">Run Match Analysis</button>
+                                </div>
+                            </div>
+
+                            <!-- Interview Rounds Section -->
+                            <div class="rounds-section">
+                                <div class="rounds-header">
+                                    <strong>Interview Rounds</strong>
+                                    <button id="quickAiPrepBtn" class="btn btn-sm btn-accent">Prepare for Interview</button>
+                                </div>
+                                <div id="inspRoundsList" class="rounds-list"></div>
+
+                                <form id="scheduleRoundForm" class="inline-form">
+                                    <select id="roundTypeSelect">
+                                        <option value="SCREENING">SCREENING</option>
+                                        <option value="TECHNICAL">TECHNICAL</option>
+                                        <option value="SYSTEM_DESIGN">SYSTEM_DESIGN</option>
+                                        <option value="BEHAVIORAL">BEHAVIORAL</option>
+                                    </select>
+                                    <input type="text" id="roundNotesInput" placeholder="Topics or notes for this round..." required />
+                                    <button type="submit" class="btn btn-sm btn-primary">+ Add Round</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: RESUMES -->
+            <div id="viewResumes" class="tab-view hidden">
+                <div class="split-layout">
+                    <div class="panel">
+                        <h3>Add Resume</h3>
+                        <p class="text-muted" style="margin-bottom: 1rem;">Upload a PDF file or paste your resume text to match against job descriptions.</p>
+
+                        <form id="uploadPdfResumeForm" class="form-stack">
+                            <h4>Upload PDF Resume</h4>
+                            <div class="form-group">
+                                <label>Resume Title *</label>
+                                <input type="text" id="pdfVersionName" required placeholder="e.g. Backend Software Engineer Resume" />
+                            </div>
+                            <div class="form-group">
+                                <label>PDF File *</label>
+                                <input type="file" id="pdfFileInput" accept="application/pdf" required />
+                            </div>
+                            <button type="submit" class="btn btn-primary">Upload PDF</button>
+                        </form>
+
+                        <div class="divider"><span>OR PASTE RESUME TEXT</span></div>
+
+                        <form id="uploadTextResumeForm" class="form-stack">
+                            <div class="form-group">
+                                <label>Resume Title *</label>
+                                <input type="text" id="resVersionName" required placeholder="e.g. Java & AI Engineer Resume" />
+                            </div>
+                            <div class="form-group">
+                                <label>Resume Text *</label>
+                                <textarea id="resRawContent" rows="6" required placeholder="Paste your resume sections (Summary, Experience, Skills, Education)..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-outline">Save Text Resume</button>
+                        </form>
+                    </div>
+
+                    <div class="panel">
+                        <h3>Saved Resumes</h3>
+                        <div id="resumesList" class="card-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: RESUME SEARCH -->
+            <div id="viewRag" class="tab-view hidden">
+                <div class="panel">
+                    <h3>Semantic Resume Search</h3>
+                    <p class="text-muted">Search across your saved resume sections to find the most relevant experience for a specific skill or requirement.</p>
+
+                    <form id="ragSearchForm" class="rag-bar">
+                        <select id="ragResumeSelect" required>
+                            <option value="">-- Select Resume --</option>
+                        </select>
+                        <input type="text" id="ragQueryInput" required placeholder="Search skills or experience (e.g. Java Spring Boot PostgreSQL REST APIs)..." />
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </form>
+
+                    <div id="ragResultsList" class="card-list"></div>
+                </div>
+            </div>
+
+            <!-- TAB 4: AI INTERVIEW COACH -->
+            <div id="viewAgent" class="tab-view hidden">
+                <div class="split-layout">
+                    <div class="panel">
+                        <h3>AI Career Coach</h3>
+                        <p class="text-muted">Ask questions about your job search or ask the coach to schedule an interview round for a selected application.</p>
+
+                        <div class="form-group" style="margin-top: 0.75rem;">
+                            <label>Application Context</label>
+                            <select id="agentAppSelect">
+                                <option value="">-- All Applications --</option>
+                            </select>
+                        </div>
+
+                        <div id="chatLog" class="chat-log">
+                            <div class="chat-bubble assistant">
+                                <strong>CareerPilot Coach:</strong> Select an application above or ask me anything about your job search, interview preparation, or schedule!
+                            </div>
+                        </div>
+
+                        <form id="agentChatForm" class="inline-form">
+                            <input type="text" id="agentChatInput" required placeholder="Ask for interview advice or say 'Schedule a technical interview'..." />
+                            <button type="submit" class="btn btn-primary">Send</button>
+                        </form>
+                    </div>
+
+                    <div class="panel">
+                        <h3>Tailored Interview Preparation Plan</h3>
+                        <p class="text-muted" style="margin-bottom: 0.75rem;">Custom technical questions and system design topics based on the target role's job description.</p>
+                        <div id="prepPlanOutput" class="empty-state">
+                            Select an application in the <strong>Applications</strong> tab and click <strong>"Prepare for Interview"</strong> to generate a tailored study guide.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="toast" class="toast hidden"></div>
+    <script src="/app.js"></script>
+</body>
+</html>
